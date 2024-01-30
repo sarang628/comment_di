@@ -11,6 +11,7 @@ import com.sarang.torang.usecase.comments.DeleteCommentUseCase
 import com.sarang.torang.usecase.comments.GetCommentsUseCase
 import com.sarang.torang.usecase.comments.GetUserUseCase
 import com.sarang.torang.usecase.comments.SendCommentUseCase
+import com.sarang.torang.usecase.comments.UpdateCommentLikeUseCase
 import com.sarang.torang.util.DateConverter
 import dagger.Module
 import dagger.Provides
@@ -97,6 +98,15 @@ class CommentModule {
         return object : DeleteCommentUseCase {
             override suspend fun delete(commentId: Int) {
                 apiComment.deleteComment(commentId)
+            }
+        }
+    }
+
+    @Provides
+    fun providesUpdateCommentLikeUseCase(apiComment: ApiComment): UpdateCommentLikeUseCase {
+        return object : UpdateCommentLikeUseCase {
+            override suspend fun invoke(commentId: Int): Comment {
+                TODO("Not yet implemented")
             }
         }
     }
