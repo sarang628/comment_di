@@ -32,10 +32,10 @@ class CommentModule {
                         name = it.user.userName,
                         comment = it.comment,
                         date = DateConverter.formattedDate(it.create_date),
-                        likeCount = 0,
                         profileImageUrl = BuildConfig.PROFILE_IMAGE_SERVER_URL + it.user.profilePicUrl,
                         userId = it.user.userId,
-                        commentsId = it.comment_id
+                        commentsId = it.comment_id,
+                        commentLikeCount = it.comment_like_count
                     )
                 }
             }
@@ -80,10 +80,10 @@ class CommentModule {
                             name = it.user.userName,
                             comment = it.comment,
                             date = "",
-                            likeCount = 0,
                             profileImageUrl = it.user.profilePicUrl,
                             userId = it.user.userId,
-                            commentsId = it.comment_id
+                            commentsId = it.comment_id,
+                            commentLikeCount = 0
                         )
                     }
                 } else {
