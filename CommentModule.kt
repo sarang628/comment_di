@@ -4,6 +4,7 @@ import com.sarang.torang.BuildConfig
 import com.sarang.torang.api.ApiComment
 import com.sarang.torang.api.ApiCommentLike
 import com.sarang.torang.data.comments.Comment
+import com.sarang.torang.data.comments.TagUser
 import com.sarang.torang.data.comments.User
 import com.sarang.torang.data.dao.LoggedInUserDao
 import com.sarang.torang.repository.CommentRepository
@@ -39,7 +40,10 @@ class CommentModule {
                         userId = it.user.userId,
                         commentsId = it.comment_id,
                         commentLikeCount = it.comment_like_count,
-                        commentLikeId = it.comment_like_id
+                        commentLikeId = it.comment_like_id,
+                        tagUser = if(it.tagUser != null) TagUser(it.tagUser!!.userId, it.tagUser!!.userName) else null,
+                        subCommentCount = it.sub_comment_count,
+                        parentCommentId = it.parentCommentId
                     )
                 }
             }
