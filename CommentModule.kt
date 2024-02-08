@@ -64,7 +64,8 @@ class CommentModule {
                 if (user != null) {
                     return User(
                         BuildConfig.PROFILE_IMAGE_SERVER_URL + user.profilePicUrl,
-                        userId = user.userId
+                        userId = user.userId,
+                        userName = user.userName
                     )
                 } else {
                     throw Exception("로그인을 해주세요.")
@@ -92,7 +93,7 @@ class CommentModule {
                             name = it.user.userName,
                             comment = it.comment,
                             date = "",
-                            profileImageUrl = it.user.profilePicUrl,
+                            profileImageUrl = BuildConfig.PROFILE_IMAGE_SERVER_URL + it.user.profilePicUrl,
                             userId = it.user.userId,
                             commentsId = it.comment_id,
                             commentLikeCount = 0
@@ -131,10 +132,11 @@ class CommentModule {
                             name = it.user.userName,
                             comment = it.comment,
                             date = "",
-                            profileImageUrl = it.user.profilePicUrl,
+                            profileImageUrl = BuildConfig.PROFILE_IMAGE_SERVER_URL + it.user.profilePicUrl,
                             userId = it.user.userId,
                             commentsId = it.comment_id,
-                            commentLikeCount = 0
+                            commentLikeCount = 0,
+                            parentCommentId = it.parentCommentId,
                         )
                     }
                 } else {
