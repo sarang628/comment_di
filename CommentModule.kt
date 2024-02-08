@@ -16,6 +16,7 @@ import com.sarang.torang.usecase.comments.DeleteCommentUseCase
 import com.sarang.torang.usecase.comments.GetCommentsUseCase
 import com.sarang.torang.usecase.comments.GetUserUseCase
 import com.sarang.torang.usecase.comments.SendCommentUseCase
+import com.sarang.torang.usecase.comments.SendReplyUseCase
 import com.sarang.torang.util.DateConverter
 import dagger.Module
 import dagger.Provides
@@ -41,7 +42,10 @@ class CommentModule {
                         commentsId = it.comment_id,
                         commentLikeCount = it.comment_like_count,
                         commentLikeId = it.comment_like_id,
-                        tagUser = if(it.tagUser != null) TagUser(it.tagUser!!.userId, it.tagUser!!.userName) else null,
+                        tagUser = if (it.tagUser != null) TagUser(
+                            it.tagUser!!.userId,
+                            it.tagUser!!.userName
+                        ) else null,
                         subCommentCount = it.sub_comment_count,
                         parentCommentId = it.parentCommentId
                     )
@@ -75,7 +79,7 @@ class CommentModule {
         sessionService: SessionService
     ): SendCommentUseCase {
         return object : SendCommentUseCase {
-            override suspend fun invoke(reviewId: Int, comment: String): Comment {
+            override suspend fun invoke(reviewId: Int, comment: String, tagUserId: Int?): Comment {
                 val auth = sessionService.getToken()
                 if (auth != null) {
                     auth.let {
@@ -83,6 +87,45 @@ class CommentModule {
                             auth = auth,
                             review_id = reviewId,
                             comment = comment
+                        )
+                        return Comment(
+                            name = it.user.userName,
+                            comment = it.comment,
+                            date = "",
+                            profileImageUrl = it.user.profilePicUrl,
+                            userId = it.user.userId,
+                            commentsId = it.comment_id,
+                            commentLikeCount = 0
+                        )
+                    }
+                } else {
+                    throw Exception("로그인을 해주세요.")
+                }
+            }
+        }
+    }
+
+    @Provides
+    fun providesSendReplyUseCase(
+        apiComment: ApiComment,
+        sessionService: SessionService
+    ): SendReplyUseCase {
+        return object : SendReplyUseCase {
+            override suspend fun invoke(
+                reviewId: Int,
+                parentCommentId: Int,
+                comment: String,
+                tagUserId: Int?
+            ): Comment {
+                val auth = sessionService.getToken()
+                if (auth != null) {
+                    auth.let {
+                        val it = apiComment.addComment(
+                            auth = auth,
+                            review_id = reviewId,
+                            comment = comment,
+                            parentCommentId = parentCommentId,
+                            tagUserId = tagUserId
                         )
                         return Comment(
                             name = it.user.userName,
