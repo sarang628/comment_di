@@ -39,7 +39,7 @@ class CommentModule {
                         date = DateConverter.formattedDate(it.create_date),
                         profileImageUrl = BuildConfig.PROFILE_IMAGE_SERVER_URL + it.user.profilePicUrl,
                         userId = it.user.userId,
-                        commentsId = it.comment_id,
+                        commentsId = it.comment_id.toLong(),
                         commentLikeCount = it.comment_like_count,
                         commentLikeId = it.comment_like_id,
                         tagUser = if (it.tagUser != null) TagUser(
@@ -47,7 +47,7 @@ class CommentModule {
                             it.tagUser!!.userName
                         ) else null,
                         subCommentCount = it.sub_comment_count,
-                        parentCommentId = it.parentCommentId
+                        parentCommentId = it.parentCommentId.toLong()
                     )
                 }
             }
@@ -95,7 +95,7 @@ class CommentModule {
                             date = "",
                             profileImageUrl = BuildConfig.PROFILE_IMAGE_SERVER_URL + it.user.profilePicUrl,
                             userId = it.user.userId,
-                            commentsId = it.comment_id,
+                            commentsId = it.comment_id.toLong(),
                             commentLikeCount = 0
                         )
                     }
@@ -114,7 +114,7 @@ class CommentModule {
         return object : SendReplyUseCase {
             override suspend fun invoke(
                 reviewId: Int,
-                parentCommentId: Int,
+                parentCommentId: Long,
                 comment: String,
                 tagUserId: Int?
             ): Comment {
@@ -125,7 +125,7 @@ class CommentModule {
                             auth = auth,
                             review_id = reviewId,
                             comment = comment,
-                            parentCommentId = parentCommentId,
+                            parentCommentId = parentCommentId.toInt(),
                             tagUserId = tagUserId
                         )
                         return Comment(
@@ -134,9 +134,9 @@ class CommentModule {
                             date = "",
                             profileImageUrl = BuildConfig.PROFILE_IMAGE_SERVER_URL + it.user.profilePicUrl,
                             userId = it.user.userId,
-                            commentsId = it.comment_id,
+                            commentsId = it.comment_id.toLong(),
                             commentLikeCount = 0,
-                            parentCommentId = it.parentCommentId,
+                            parentCommentId = it.parentCommentId.toLong(),
                         )
                     }
                 } else {
@@ -149,8 +149,8 @@ class CommentModule {
     @Provides
     fun provideDeleteCommentUseCase(apiComment: ApiComment): DeleteCommentUseCase {
         return object : DeleteCommentUseCase {
-            override suspend fun delete(commentId: Int) {
-                apiComment.deleteComment(commentId)
+            override suspend fun delete(commentId: Long) {
+                apiComment.deleteComment(commentId.toInt())
             }
         }
     }
@@ -161,9 +161,12 @@ class CommentModule {
         sessionClientService: SessionClientService
     ): AddCommentLikeUseCase {
         return object : AddCommentLikeUseCase {
-            override suspend fun invoke(commentId: Int): Int {
+            override suspend fun invoke(commentId: Long): Int {
                 val result =
-                    apiCommentLike.addCommentLike(sessionClientService.getToken() ?: "", commentId)
+                    apiCommentLike.addCommentLike(
+                        sessionClientService.getToken() ?: "",
+                        commentId.toInt()
+                    )
                 return result.commentLikeId
             }
         }
@@ -175,10 +178,10 @@ class CommentModule {
         sessionClientService: SessionClientService
     ): DeleteCommentLikeUseCase {
         return object : DeleteCommentLikeUseCase {
-            override suspend fun invoke(commentId: Int): Boolean {
+            override suspend fun invoke(commentId: Long): Boolean {
                 return apiCommentLike.deleteCommentLike(
                     sessionClientService.getToken() ?: "",
-                    commentId
+                    commentId.toInt()
                 )
             }
         }
