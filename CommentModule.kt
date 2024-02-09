@@ -22,6 +22,9 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 
 @InstallIn(SingletonComponent::class)
 @Module
@@ -59,16 +62,17 @@ class CommentModule {
         loggedInUserDao: LoggedInUserDao
     ): GetUserUseCase {
         return object : GetUserUseCase {
-            override suspend fun invoke(): User {
-                val user = loggedInUserDao.getLoggedInUser1()
-                if (user != null) {
-                    return User(
-                        BuildConfig.PROFILE_IMAGE_SERVER_URL + user.profilePicUrl,
-                        userId = user.userId,
-                        userName = user.userName
-                    )
-                } else {
-                    throw Exception("로그인을 해주세요.")
+            override suspend fun invoke(): Flow<User?> {
+                return loggedInUserDao.getLoggedInUser().map {
+                    if (it != null) {
+                        User(
+                            BuildConfig.PROFILE_IMAGE_SERVER_URL + it.profilePicUrl,
+                            userId = it.userId,
+                            userName = it.userName
+                        )
+                    } else {
+                        null
+                    }
                 }
             }
         }
