@@ -16,6 +16,7 @@ import com.sarang.torang.usecase.comments.DeleteCommentLikeUseCase
 import com.sarang.torang.usecase.comments.DeleteCommentUseCase
 import com.sarang.torang.usecase.comments.GetCommentsUseCase
 import com.sarang.torang.usecase.comments.GetUserUseCase
+import com.sarang.torang.usecase.comments.LoadMoreUseCase
 import com.sarang.torang.usecase.comments.SendCommentUseCase
 import com.sarang.torang.usecase.comments.SendReplyUseCase
 import com.sarang.torang.util.DateConverter
@@ -141,23 +142,13 @@ class CommentModule {
                 val auth = sessionService.getToken()
                 if (auth != null) {
                     auth.let {
-                        val it = apiComment.addComment(
+                        return apiComment.addComment(
                             auth = auth,
                             review_id = reviewId,
                             comment = comment,
                             parentCommentId = parentCommentId.toInt(),
                             tagUserId = tagUserId
-                        )
-                        return Comment(
-                            name = it.user.userName,
-                            comment = it.comment,
-                            date = "",
-                            profileImageUrl = BuildConfig.PROFILE_IMAGE_SERVER_URL + it.user.profilePicUrl,
-                            userId = it.user.userId,
-                            commentsId = it.comment_id.toLong(),
-                            commentLikeCount = 0,
-                            parentCommentId = it.parent_comment_id.toLong(),
-                        )
+                        ).toComment()
                     }
                 } else {
                     throw Exception("로그인을 해주세요.")
@@ -205,5 +196,31 @@ class CommentModule {
                 )
             }
         }
+    }
+
+    @Provides
+    fun providesLoadMoreUseCase(
+        commentRepository: CommentRepository
+    ): LoadMoreUseCase {
+        return object : LoadMoreUseCase {
+            override suspend fun invoke(commentId: Int): List<Comment> {
+                return commentRepository.getSubComment(commentId).map {
+                    it.toComment()
+                }
+            }
+        }
+    }
+
+    fun RemoteComment.toComment(): Comment {
+        return Comment(
+            name = this.user.userName,
+            comment = this.comment,
+            date = "",
+            profileImageUrl = BuildConfig.PROFILE_IMAGE_SERVER_URL + this.user.profilePicUrl,
+            userId = this.user.userId,
+            commentsId = this.comment_id.toLong(),
+            commentLikeCount = 0,
+            parentCommentId = this.parent_comment_id.toLong(),
+        )
     }
 }
