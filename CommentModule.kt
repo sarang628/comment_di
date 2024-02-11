@@ -3,6 +3,7 @@ package com.sarang.torang.di.comment_di
 import com.sarang.torang.BuildConfig
 import com.sarang.torang.api.ApiComment
 import com.sarang.torang.api.ApiCommentLike
+import com.sarang.torang.data.RemoteComment
 import com.sarang.torang.data.comments.Comment
 import com.sarang.torang.data.comments.TagUser
 import com.sarang.torang.data.comments.User
@@ -35,24 +36,39 @@ class CommentModule {
     ): GetCommentsUseCase {
         return object : GetCommentsUseCase {
             override suspend fun invoke(reviewId: Int): List<Comment> {
-                return commentRepository.getComment(reviewId = reviewId).list.map {
-                    Comment(
-                        name = it.user.userName,
-                        comment = it.comment,
-                        date = DateConverter.formattedDate(it.create_date),
-                        profileImageUrl = BuildConfig.PROFILE_IMAGE_SERVER_URL + it.user.profilePicUrl,
-                        userId = it.user.userId,
-                        commentsId = it.comment_id.toLong(),
-                        commentLikeCount = it.comment_like_count,
-                        commentLikeId = it.comment_like_id,
-                        tagUser = if (it.tagUser != null) TagUser(
-                            it.tagUser!!.userId,
-                            it.tagUser!!.userName
-                        ) else null,
-                        subCommentCount = it.sub_comment_count,
-                        parentCommentId = it.parentCommentId.toLong()
-                    )
+
+                commentRepository.getCommentsWithOneReply(reviewId = reviewId).list.flatMap { comment ->
+                    val list = mutableListOf<RemoteComment>()
+                    list.add(comment)
+                    comment.childComment?.let { list.add(it) }
+                    list
                 }
+
+
+                return commentRepository.getCommentsWithOneReply(reviewId = reviewId).list.flatMap { comment ->
+                    val list = mutableListOf<RemoteComment>()
+                    list.add(comment)
+                    comment.childComment?.let { list.add(it) }
+                    list
+                }//childComment flat 하게 만들기
+                    .map {
+                        Comment(
+                            name = it.user.userName,
+                            comment = it.comment,
+                            date = DateConverter.formattedDate(it.create_date),
+                            profileImageUrl = BuildConfig.PROFILE_IMAGE_SERVER_URL + it.user.profilePicUrl,
+                            userId = it.user.userId,
+                            commentsId = it.comment_id.toLong(),
+                            commentLikeCount = it.comment_like_count,
+                            commentLikeId = it.comment_like_id,
+                            tagUser = if (it.tagUser != null) TagUser(
+                                it.tagUser!!.userId,
+                                it.tagUser!!.userName
+                            ) else null,
+                            subCommentCount = it.sub_comment_count,
+                            parentCommentId = it.parent_comment_id.toLong()
+                        )
+                    }
             }
         }
     }
@@ -140,7 +156,7 @@ class CommentModule {
                             userId = it.user.userId,
                             commentsId = it.comment_id.toLong(),
                             commentLikeCount = 0,
-                            parentCommentId = it.parentCommentId.toLong(),
+                            parentCommentId = it.parent_comment_id.toLong(),
                         )
                     }
                 } else {
