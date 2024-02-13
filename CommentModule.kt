@@ -8,6 +8,7 @@ import com.sarang.torang.data.comments.Comment
 import com.sarang.torang.data.comments.TagUser
 import com.sarang.torang.data.comments.User
 import com.sarang.torang.data.dao.LoggedInUserDao
+import com.sarang.torang.data.entity.CommentEntity
 import com.sarang.torang.repository.CommentRepository
 import com.sarang.torang.session.SessionClientService
 import com.sarang.torang.session.SessionService
@@ -36,40 +37,12 @@ class CommentModule {
         commentRepository: CommentRepository
     ): GetCommentsUseCase {
         return object : GetCommentsUseCase {
-            override suspend fun invoke(reviewId: Int): List<Comment> {
-
-                commentRepository.getCommentsWithOneReply(reviewId = reviewId).list.flatMap { comment ->
-                    val list = mutableListOf<RemoteComment>()
-                    list.add(comment)
-                    comment.childComment?.let { list.add(it) }
-                    list
+            override suspend fun invoke(reviewId: Int): Flow<List<Comment>> {
+                commentRepository.clear()
+                commentRepository.getCommentsWithOneReply(reviewId)
+                return commentRepository.getCommentsFlow(reviewId).map {
+                    it.toComments()
                 }
-
-
-                return commentRepository.getCommentsWithOneReply(reviewId = reviewId).list.flatMap { comment ->
-                    val list = mutableListOf<RemoteComment>()
-                    list.add(comment)
-                    comment.childComment?.let { list.add(it) }
-                    list
-                }//childComment flat 하게 만들기
-                    .map {
-                        Comment(
-                            name = it.user.userName,
-                            comment = it.comment,
-                            date = DateConverter.formattedDate(it.create_date),
-                            profileImageUrl = BuildConfig.PROFILE_IMAGE_SERVER_URL + it.user.profilePicUrl,
-                            userId = it.user.userId,
-                            commentsId = it.comment_id.toLong(),
-                            commentLikeCount = it.comment_like_count,
-                            commentLikeId = it.comment_like_id,
-                            tagUser = if (it.tagUser != null) TagUser(
-                                it.tagUser!!.userId,
-                                it.tagUser!!.userName
-                            ) else null,
-                            subCommentCount = it.sub_comment_count,
-                            parentCommentId = it.parent_comment_id.toLong()
-                        )
-                    }
             }
         }
     }
@@ -203,10 +176,8 @@ class CommentModule {
         commentRepository: CommentRepository
     ): LoadMoreUseCase {
         return object : LoadMoreUseCase {
-            override suspend fun invoke(commentId: Int): List<Comment> {
-                return commentRepository.getSubComment(commentId).map {
-                    it.toComment()
-                }
+            override suspend fun invoke(commentId: Int) {
+                return commentRepository.loadMoreReply(commentId)
             }
         }
     }
@@ -222,5 +193,30 @@ class CommentModule {
             commentLikeCount = 0,
             parentCommentId = this.parent_comment_id.toLong(),
         )
+    }
+
+    fun CommentEntity.toComment(): Comment {
+        return Comment(
+            name = userName,
+            comment = comment,
+            date = DateConverter.formattedDate(createDate),
+            profileImageUrl = BuildConfig.PROFILE_IMAGE_SERVER_URL + profilePicUrl,
+            userId = userId,
+            commentsId = commentId.toLong(),
+            commentLikeCount = commentLikeCount,
+            commentLikeId = commentLikeId,
+            /*tagUser = if (it.tagUser != null) TagUser(
+                it.tagUser!!.userId,
+                it.tagUser!!.userName
+            ) else null,*/
+            subCommentCount = subCommentCount,
+            parentCommentId = parentCommentId?.toLong()
+        )
+    }
+
+    fun List<CommentEntity>.toComments(): List<Comment> {
+        return this.map {
+            it.toComment()
+        }
     }
 }
