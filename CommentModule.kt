@@ -9,7 +9,7 @@ import com.sarang.torang.data.comments.TagUser
 import com.sarang.torang.data.comments.User
 import com.sarang.torang.data.dao.LoggedInUserDao
 import com.sarang.torang.data.entity.CommentEntity
-import com.sarang.torang.repository.CommentRepository
+import com.sarang.torang.repository.comment.CommentRepository
 import com.sarang.torang.session.SessionClientService
 import com.sarang.torang.session.SessionService
 import com.sarang.torang.usecase.comments.AddCommentLikeUseCase
@@ -70,32 +70,16 @@ class CommentModule {
 
     @Provides
     fun providesSendCommentUseCase(
-        apiComment: ApiComment,
-        sessionService: SessionService
+        commentRepository: CommentRepository,
     ): SendCommentUseCase {
         return object : SendCommentUseCase {
-            override suspend fun invoke(reviewId: Int, comment: String, tagUserId: Int?): Comment {
-                val auth = sessionService.getToken()
-                if (auth != null) {
-                    auth.let {
-                        val it = apiComment.addComment(
-                            auth = auth,
-                            review_id = reviewId,
-                            comment = comment
-                        )
-                        return Comment(
-                            name = it.user.userName,
-                            comment = it.comment,
-                            date = "",
-                            profileImageUrl = BuildConfig.PROFILE_IMAGE_SERVER_URL + it.user.profilePicUrl,
-                            userId = it.user.userId,
-                            commentsId = it.comment_id.toLong(),
-                            commentLikeCount = 0
-                        )
-                    }
-                } else {
-                    throw Exception("로그인을 해주세요.")
-                }
+            override suspend fun invoke(
+                reviewId: Int,
+                comment: String,
+                tagUserId: Int?,
+                onLocalUpdated: () -> Unit
+            ) {
+                commentRepository.addComment(reviewId, comment, onLocalUpdated)
             }
         }
     }
@@ -195,7 +179,7 @@ class CommentModule {
         )
     }
 
-    fun CommentEntity.toComment(): Comment {
+    private fun CommentEntity.toComment(): Comment {
         return Comment(
             name = userName,
             comment = comment,
@@ -210,7 +194,8 @@ class CommentModule {
                 it.tagUser!!.userName
             ) else null,*/
             subCommentCount = subCommentCount,
-            parentCommentId = parentCommentId?.toLong()
+            parentCommentId = parentCommentId?.toLong(),
+            isUploading = isUploading
         )
     }
 
