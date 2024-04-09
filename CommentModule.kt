@@ -86,30 +86,22 @@ class CommentModule {
 
     @Provides
     fun providesSendReplyUseCase(
-        apiComment: ApiComment,
-        sessionService: SessionService
+        commentRepository: CommentRepository
     ): SendReplyUseCase {
         return object : SendReplyUseCase {
             override suspend fun invoke(
                 reviewId: Int,
                 parentCommentId: Long,
                 comment: String,
-                tagUserId: Int?
-            ): Comment {
-                val auth = sessionService.getToken()
-                if (auth != null) {
-                    auth.let {
-                        return apiComment.addComment(
-                            auth = auth,
-                            review_id = reviewId,
-                            comment = comment,
-                            parentCommentId = parentCommentId.toInt(),
-                            tagUserId = tagUserId
-                        ).toComment()
-                    }
-                } else {
-                    throw Exception("로그인을 해주세요.")
-                }
+                tagUserId: Int?,
+                onLocalUpdated: () -> Unit
+            ) {
+                commentRepository.addReply(
+                    reviewId = reviewId,
+                    comment = comment,
+                    parentCommentId = parentCommentId.toInt(),
+                    onLocalUpdated = onLocalUpdated
+                )
             }
         }
     }
