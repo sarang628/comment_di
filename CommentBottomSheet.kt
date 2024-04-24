@@ -56,10 +56,6 @@ fun CommentBottomSheet(
     viewModel: CommentViewModel = hiltViewModel(),
     reviewId: Int? = null,
     onDismissRequest: () -> Unit,
-    sheetState: BottomSheetScaffoldState = rememberBottomSheetScaffoldState(
-        bottomSheetState = rememberStandardBottomSheetState(skipHiddenState = false)
-    ),
-    onBackPressed: () -> Unit,
     show: Boolean = false,
     onHidden: (() -> Unit)? = null,
     content: @Composable (PaddingValues) -> Unit
@@ -67,21 +63,10 @@ fun CommentBottomSheet(
     val uiState by viewModel.uiState.collectAsState()
     val replySingleEvent by viewModel.replySingleEvent.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
-    val coroutine = rememberCoroutineScope()
 
-    BackHandler {
-        coroutine.launch {
-            if (sheetState.bottomSheetState.currentValue != SheetValue.Hidden) {
-                sheetState.bottomSheetState.hide()
-                viewModel.onClear()
-            } else {
-                onBackPressed.invoke()
-            }
-        }
-    }
-
-    LaunchedEffect(key1 = reviewId) {
-        viewModel.loadComment(reviewId)
+    LaunchedEffect(key1 = show) {
+        if (show)
+            viewModel.loadComment(reviewId)
     }
 
     LaunchedEffect(key1 = uiState.snackBarMessage, block = {
@@ -92,7 +77,6 @@ fun CommentBottomSheet(
     })
 
     TorangCommentBottomSheetScaffold(
-        scaffoldState = sheetState,
         show = show,
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         input = {
