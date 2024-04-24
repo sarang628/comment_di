@@ -60,7 +60,7 @@ fun CommentBottomSheet(
         bottomSheetState = rememberStandardBottomSheetState(skipHiddenState = false)
     ),
     onBackPressed: () -> Unit,
-    init: Boolean = false,
+    show: Boolean = false,
     onHidden: (() -> Unit)? = null,
     content: @Composable (PaddingValues) -> Unit
 ) {
@@ -91,18 +91,9 @@ fun CommentBottomSheet(
         }
     })
 
-    LaunchedEffect(key1 = sheetState.bottomSheetState.currentValue) {
-        snapshotFlow { sheetState.bottomSheetState.currentValue }.collect {
-            if (it == SheetValue.Hidden) {
-                onDismissRequest.invoke()
-                viewModel.onClear()
-            }
-        }
-    }
-
     TorangCommentBottomSheetScaffold(
         scaffoldState = sheetState,
-        init = init,
+        show = show,
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         input = {
             InputCommentForSticky(
@@ -110,7 +101,7 @@ fun CommentBottomSheet(
                 sendComment = { viewModel.sendComment() },
                 onCommentChange = { viewModel.onCommentChange(it) },
                 onClearReply = { viewModel.onClearReply() },
-                requestFocus = !init || replySingleEvent != null
+                requestFocus = !show || replySingleEvent != null
             )
         },
         sheetPeekHeight = 400.dp,
@@ -132,7 +123,11 @@ fun CommentBottomSheet(
             }
         },
         content = content,
-        onHidden = onHidden
+        onHidden = {
+            onHidden?.invoke()
+            onDismissRequest.invoke()
+            viewModel.onClear()
+        }
     )
 }
 
