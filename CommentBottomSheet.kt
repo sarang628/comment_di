@@ -281,6 +281,20 @@ fun PreviewCommentBody() {
     )
 }
 
+fun provideCommentBottomDialogSheet(
+    show: Boolean,
+    onHidden: (() -> Unit)? = null,
+): @Composable (reviewId: Int?) -> Unit =
+    { reviewId ->
+        CommentBottomSheet(
+            reviewId = reviewId,
+            onDismissRequest = { },
+            show = show,
+            onHidden = onHidden,
+            content = { }
+        )
+    }
+
 @Preview
 @Composable
 fun PreviewInputCommentSticky() {
