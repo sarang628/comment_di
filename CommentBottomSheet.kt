@@ -19,9 +19,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
@@ -50,7 +52,8 @@ fun CommentBottomSheet(
     onDismissRequest: () -> Unit,
     show: Boolean = false,
     onHidden: (() -> Unit)? = null,
-    content: @Composable (PaddingValues) -> Unit
+    content: @Composable (PaddingValues) -> Unit,
+    image: @Composable (Modifier, String, Dp?, Dp?, ContentScale?) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val replySingleEvent by viewModel.replySingleEvent.collectAsState()
@@ -77,7 +80,8 @@ fun CommentBottomSheet(
                 sendComment = { viewModel.sendComment() },
                 onCommentChange = { viewModel.onCommentChange(it) },
                 onClearReply = { viewModel.onClearReply() },
-                requestFocus = !show || replySingleEvent != null
+                requestFocus = !show || replySingleEvent != null,
+                image = image
             )
         },
         sheetPeekHeight = 400.dp,
@@ -95,7 +99,9 @@ fun CommentBottomSheet(
                     onFavorite = { viewModel.onFavorite(it) },
                     onReply = { viewModel.onReply(it) },
                     onClearReply = { viewModel.onClearReply() },
-                    onViewMore = { viewModel.onViewMore(it) })
+                    onViewMore = { viewModel.onViewMore(it) },
+                    image = image
+                )
             }
         },
         content = content,
@@ -130,7 +136,8 @@ fun CommentBottomSheetBody(
     onFavorite: ((Long) -> Unit)? = null,
     onReply: ((Comment) -> Unit)? = null,
     onClearReply: (() -> Unit)? = null,
-    onViewMore: ((Long) -> Unit)? = null
+    onViewMore: ((Long) -> Unit)? = null,
+    image: @Composable (Modifier, String, Dp?, Dp?, ContentScale?) -> Unit
 ) {
     ConstraintLayout(
         modifier = modifier
@@ -161,7 +168,8 @@ fun CommentBottomSheetBody(
                 onFavorite = onFavorite,
                 onReply = onReply,
                 myId = uiState.writer?.userId,
-                onViewMore = onViewMore
+                onViewMore = onViewMore,
+                image = image
             )
         }
     }
@@ -220,14 +228,16 @@ fun InputCommentForSticky(
     sendComment: () -> Unit,
     onCommentChange: (String) -> Unit,
     onClearReply: (() -> Unit)?,
-    requestFocus: Boolean = false
+    requestFocus: Boolean = false,
+    image: @Composable (Modifier, String, Dp?, Dp?, ContentScale?) -> Unit
 ) {
     Column {
         if (uiState.reply != null)
             ReplyComment(
                 profileImageUrl = uiState.reply!!.profileImageUrl,
                 uiState.reply!!.name,
-                onClearReply
+                onClearReply,
+                image = image
             )
 
         if (uiState.isLogin)
@@ -246,7 +256,8 @@ fun InputCommentForSticky(
                 onValueChange = { onCommentChange(it) },
                 replyName = uiState.reply?.name,
                 isUploading = uiState.isUploading,
-                requestFocus = requestFocus
+                requestFocus = requestFocus,
+                image = image
             )
     }
 }
@@ -260,6 +271,7 @@ fun PreviewCommentBody() {
         onDelete = {},
         onUndo = {},
         sendComment = {},
+        image = { _, _, _, _, _ -> },
         uiState = CommentsUiState().copy(
             list = arrayListOf(
                 testComment(0),
@@ -302,5 +314,5 @@ fun PreviewInputCommentSticky() {
         writer = User("", 10, ""),
         reply = testComment()
     ), sendComment = { /*TODO*/ },
-        onClearReply = {}, onCommentChange = {})
+        onClearReply = {}, onCommentChange = {}, image = { _, _, _, _, _ -> })
 }
