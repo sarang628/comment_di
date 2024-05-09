@@ -303,7 +303,8 @@ fun provideCommentBottomDialogSheet(
             onDismissRequest = { },
             show = show,
             onHidden = onHidden,
-            content = { }
+            content = { },
+            image = { _, _, _, _, _ -> }
         )
     }
 
