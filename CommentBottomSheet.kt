@@ -35,6 +35,7 @@ import com.sarang.torang.data.comments.Comment
 import com.sarang.torang.data.comments.User
 import com.sarang.torang.data.comments.testComment
 import com.sarang.torang.data.comments.testSubComment
+import com.sarang.torang.di.image.provideTorangAsyncImage
 import com.sarang.torang.uistate.CommentsUiState
 import com.sarang.torang.viewmodels.CommentViewModel
 import com.sryang.torang.compose.bottomsheet.bottomsheetscaffold.TorangCommentBottomSheetScaffold
@@ -260,6 +261,6 @@ fun provideCommentBottomDialogSheet(
             show = show,
             onHidden = onHidden,
             content = { },
-            image = { _, _, _, _, _ -> }
+            image = provideTorangAsyncImage()
         )
     }
