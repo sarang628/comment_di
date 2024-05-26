@@ -47,17 +47,16 @@ fun CommentBottomSheet(
     viewModel: CommentViewModel = hiltViewModel(),
     reviewId: Int? = null,
     onDismissRequest: () -> Unit,
-    show: Boolean = false,
     onHidden: (() -> Unit)? = null,
     content: @Composable (PaddingValues) -> Unit,
-    image: @Composable (Modifier, String, Dp?, Dp?, ContentScale?) -> Unit
+    image: @Composable (Modifier, String, Dp?, Dp?, ContentScale?) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val replySingleEvent by viewModel.replySingleEvent.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(key1 = show) {
-        if (show)
+    LaunchedEffect(key1 = reviewId) {
+        if (reviewId != null)
             viewModel.loadComment(reviewId)
     }
 
@@ -69,7 +68,7 @@ fun CommentBottomSheet(
     })
 
     TorangCommentBottomSheetScaffold(
-        show = show,
+        show = reviewId != null,
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         input = {
             InputComment(
@@ -77,7 +76,7 @@ fun CommentBottomSheet(
                 sendComment = { viewModel.sendComment() },
                 onCommentChange = { viewModel.onCommentChange(it) },
                 onClearReply = { viewModel.onClearReply() },
-                requestFocus = !show || replySingleEvent != null,
+                requestFocus = (reviewId == null) || replySingleEvent != null,
                 image = image
             )
         },
@@ -134,7 +133,7 @@ fun CommentBottomSheetBody(
     onReply: ((Comment) -> Unit)? = null,
     onClearReply: (() -> Unit)? = null,
     onViewMore: ((Long) -> Unit)? = null,
-    image: @Composable (Modifier, String, Dp?, Dp?, ContentScale?) -> Unit
+    image: @Composable (Modifier, String, Dp?, Dp?, ContentScale?) -> Unit,
 ) {
     ConstraintLayout(
         modifier = modifier
@@ -250,16 +249,14 @@ fun PreviewCommentBody() {
     )
 }
 
-fun provideCommentBottomDialogSheet(
-    show: Boolean,
-    onHidden: (() -> Unit)? = null,
-): @Composable (reviewId: Int?) -> Unit =
-    { reviewId ->
+fun provideCommentBottomDialogSheet(): @Composable (reviewId: Int?, onHidden: (() -> Unit)) -> Unit =
+    { reviewId, onHidden ->
         CommentBottomSheet(
             reviewId = reviewId,
             onDismissRequest = { },
-            show = show,
-            onHidden = onHidden,
+            onHidden = {
+                onHidden.invoke()
+            },
             content = { },
             image = provideTorangAsyncImage()
         )
