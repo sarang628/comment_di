@@ -253,7 +253,7 @@ fun provideCommentBottomDialogSheet(): @Composable (reviewId: Int?, onHidden: ((
     { reviewId, onHidden ->
         CommentBottomSheet(
             reviewId = reviewId,
-            onDismissRequest = { },
+            onDismissRequest = onHidden,
             onHidden = {
                 onHidden.invoke()
             },
