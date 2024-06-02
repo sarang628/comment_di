@@ -49,6 +49,8 @@ fun CommentBottomSheet(
     onDismissRequest: () -> Unit,
     show: Boolean = false,
     onHidden: (() -> Unit)? = null,
+    onName: (Int) -> Unit,
+    onImage: (Int) -> Unit,
     content: @Composable (PaddingValues) -> Unit,
     image: @Composable (Modifier, String, Dp?, Dp?, ContentScale?) -> Unit
 ) {
@@ -97,7 +99,9 @@ fun CommentBottomSheet(
                     onReply = { viewModel.onReply(it) },
                     onClearReply = { viewModel.onClearReply() },
                     onViewMore = { viewModel.onViewMore(it) },
-                    image = image
+                    image = image,
+                    onName = onName,
+                    onImage = onImage
                 )
             }
         },
@@ -130,10 +134,12 @@ fun CommentBottomSheetBody(
     onUndo: (Long) -> Unit,
     sendComment: () -> Unit,
     onCommentChange: (String) -> Unit,
-    onFavorite: ((Long) -> Unit)? = null,
-    onReply: ((Comment) -> Unit)? = null,
-    onClearReply: (() -> Unit)? = null,
-    onViewMore: ((Long) -> Unit)? = null,
+    onFavorite: (Long) -> Unit,
+    onReply: (Comment) -> Unit,
+    onClearReply: () -> Unit,
+    onViewMore: (Long) -> Unit,
+    onName: (Int) -> Unit,
+    onImage: (Int) -> Unit,
     image: @Composable (Modifier, String, Dp?, Dp?, ContentScale?) -> Unit
 ) {
     ConstraintLayout(
@@ -166,7 +172,9 @@ fun CommentBottomSheetBody(
                 onReply = onReply,
                 myId = uiState.writer?.userId,
                 onViewMore = onViewMore,
-                image = image
+                image = image,
+                onName = onName,
+                onImage = onImage
             )
         }
     }
@@ -246,7 +254,14 @@ fun PreviewCommentBody() {
             ),
             writer = User("", 10, ""),
             reply = testComment()
-        )
+        ),
+        onReply = {},
+        onFavorite = {},
+        onViewMore = {},
+        onClearReply = {},
+        onName = {},
+        onImage = {}
+
     )
 }
 
@@ -261,6 +276,8 @@ fun provideCommentBottomDialogSheet(
             show = show,
             onHidden = onHidden,
             content = { },
-            image = provideTorangAsyncImage()
+            image = provideTorangAsyncImage(),
+            onImage = {},
+            onName = {}
         )
     }
