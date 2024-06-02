@@ -50,6 +50,8 @@ fun CommentBottomSheet(
     show: Boolean = false,
     onHidden: (() -> Unit)? = null,
     content: @Composable (PaddingValues) -> Unit,
+    onName: (Int) -> Unit,
+    onImage: (Int) -> Unit,
     image: @Composable (Modifier, String, Dp?, Dp?, ContentScale?) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -97,7 +99,9 @@ fun CommentBottomSheet(
                     onReply = { viewModel.onReply(it) },
                     onClearReply = { viewModel.onClearReply() },
                     onViewMore = { viewModel.onViewMore(it) },
-                    image = image
+                    image = image,
+                    onName = onName,
+                    onImage = onImage
                 )
             }
         },
@@ -130,10 +134,12 @@ fun CommentBottomSheetBody(
     onUndo: (Long) -> Unit,
     sendComment: () -> Unit,
     onCommentChange: (String) -> Unit,
-    onFavorite: ((Long) -> Unit)? = null,
-    onReply: ((Comment) -> Unit)? = null,
-    onClearReply: (() -> Unit)? = null,
-    onViewMore: ((Long) -> Unit)? = null,
+    onFavorite: (Long) -> Unit,
+    onReply: (Comment) -> Unit,
+    onClearReply: () -> Unit,
+    onViewMore: (Long) -> Unit,
+    onName: (Int) -> Unit,
+    onImage: (Int) -> Unit,
     image: @Composable (Modifier, String, Dp?, Dp?, ContentScale?) -> Unit,
 ) {
     ConstraintLayout(
