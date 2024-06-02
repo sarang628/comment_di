@@ -264,18 +264,3 @@ fun PreviewCommentBody() {
 
     )
 }
-
-fun provideCommentBottomDialogSheet(): @Composable (reviewId: Int?, onHidden: (() -> Unit)) -> Unit =
-    { reviewId, onHidden ->
-        CommentBottomSheet(
-            reviewId = reviewId,
-            onDismissRequest = onHidden,
-            onHidden = {
-                onHidden.invoke()
-            },
-            content = { },
-            image = provideTorangAsyncImage(),
-            onImage = {},
-            onName = {}
-        )
-    }
