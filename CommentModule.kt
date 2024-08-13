@@ -3,11 +3,11 @@ package com.sarang.torang.di.comment_di
 import com.sarang.torang.BuildConfig
 import com.sarang.torang.api.ApiComment
 import com.sarang.torang.api.ApiCommentLike
-import com.sarang.torang.data.RemoteComment
 import com.sarang.torang.data.comments.Comment
 import com.sarang.torang.data.comments.User
 import com.sarang.torang.data.dao.LoggedInUserDao
 import com.sarang.torang.data.entity.CommentEntity
+import com.sarang.torang.data.remote.response.RemoteComment
 import com.sarang.torang.repository.comment.CommentRepository
 import com.sarang.torang.session.SessionClientService
 import com.sarang.torang.usecase.comments.AddCommentLikeUseCase
