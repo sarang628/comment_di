@@ -3,11 +3,13 @@ package com.sarang.torang.di.comment_di
 import com.sarang.torang.BuildConfig
 import com.sarang.torang.api.ApiComment
 import com.sarang.torang.api.ApiCommentLike
+import com.sarang.torang.compose.comments.IsLoginFlowForCommentUseCase
 import com.sarang.torang.data.comments.Comment
 import com.sarang.torang.data.comments.User
 import com.sarang.torang.data.dao.LoggedInUserDao
 import com.sarang.torang.data.entity.CommentEntity
 import com.sarang.torang.data.remote.response.RemoteComment
+import com.sarang.torang.repository.LoginRepository
 import com.sarang.torang.repository.comment.CommentRepository
 import com.sarang.torang.session.SessionClientService
 import com.sarang.torang.usecase.comments.AddCommentLikeUseCase
@@ -15,6 +17,7 @@ import com.sarang.torang.usecase.comments.DeleteCommentLikeUseCase
 import com.sarang.torang.usecase.comments.DeleteCommentUseCase
 import com.sarang.torang.usecase.comments.GetCommentsUseCase
 import com.sarang.torang.usecase.comments.GetUserUseCase
+import com.sarang.torang.usecase.comments.LoadCommentsUseCase
 import com.sarang.torang.usecase.comments.LoadMoreUseCase
 import com.sarang.torang.usecase.comments.SendCommentUseCase
 import com.sarang.torang.usecase.comments.SendReplyUseCase
@@ -25,6 +28,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
 @Module
@@ -35,11 +39,21 @@ class CommentModule {
     ): GetCommentsUseCase {
         return object : GetCommentsUseCase {
             override suspend fun invoke(reviewId: Int): Flow<List<Comment>> {
-                commentRepository.clear()
-                commentRepository.getCommentsWithOneReply(reviewId)
                 return commentRepository.getCommentsFlow(reviewId).map {
                     it.toComments()
                 }
+            }
+        }
+    }
+
+    @Provides
+    fun providesLoadCommentsUseCase(
+        commentRepository: CommentRepository
+    ): LoadCommentsUseCase {
+        return object : LoadCommentsUseCase {
+            override suspend fun invoke(reviewId: Int) {
+                commentRepository.clear()
+                commentRepository.getCommentsWithOneReply(reviewId)
             }
         }
     }
@@ -191,6 +205,17 @@ class CommentModule {
     fun List<CommentEntity>.toComments(): List<Comment> {
         return this.map {
             it.toComment()
+        }
+    }
+
+    @Singleton
+    @Provides
+    fun provideIsLoginFlowUseCase(
+        loginRepository: LoginRepository,
+    ): IsLoginFlowForCommentUseCase {
+        return object : IsLoginFlowForCommentUseCase {
+            override val isLogin: Flow<Boolean> get() = loginRepository.isLogin
+
         }
     }
 }

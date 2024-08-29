@@ -1,11 +1,14 @@
 package com.sarang.torang.di.comment_di
 
+import android.util.Log
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -16,6 +19,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layoutId
@@ -35,11 +39,13 @@ import com.sarang.torang.data.comments.Comment
 import com.sarang.torang.data.comments.User
 import com.sarang.torang.data.comments.testComment
 import com.sarang.torang.data.comments.testSubComment
-import com.sarang.torang.di.image.provideTorangAsyncImage
+import com.sarang.torang.uistate.Comments
 import com.sarang.torang.uistate.CommentsUiState
+import com.sarang.torang.uistate.isLogin
 import com.sarang.torang.viewmodels.CommentViewModel
 import com.sryang.torang.compose.bottomsheet.bottomsheetscaffold.TorangCommentBottomSheetScaffold
 
+private val TAG = "__CommentBottomSheet"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,7 +60,7 @@ fun CommentBottomSheet(
     onImage: (Int) -> Unit,
     image: @Composable (Modifier, String, Dp?, Dp?, ContentScale?) -> Unit,
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState = viewModel.uiState
     val replySingleEvent by viewModel.replySingleEvent.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -63,25 +69,19 @@ fun CommentBottomSheet(
             viewModel.loadComment(reviewId)
     }
 
-    LaunchedEffect(key1 = uiState.snackBarMessage, block = {
-        uiState.snackBarMessage?.let {
-            snackbarHostState.showSnackbar(it, duration = SnackbarDuration.Short)
-            viewModel.clearErrorMessage()
-        }
-    })
-
     TorangCommentBottomSheetScaffold(
         show = reviewId != null,
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         input = {
-            InputComment(
-                uiState = uiState,
-                sendComment = { viewModel.sendComment() },
-                onCommentChange = { viewModel.onCommentChange(it) },
-                onClearReply = { viewModel.onClearReply() },
-                requestFocus = !show || replySingleEvent != null,
-                image = image
-            )
+            if (uiState is CommentsUiState.Success)
+                InputComment(
+                    uiState = uiState.comments,
+                    sendComment = { viewModel.sendComment() },
+                    onCommentChange = { viewModel.onCommentChange(it) },
+                    onClearReply = { viewModel.onClearReply() },
+                    requestFocus = !show || replySingleEvent != null,
+                    image = image
+                )
         },
         sheetPeekHeight = 400.dp,
         inputHiddenOffset = 200.dp,
@@ -92,12 +92,9 @@ fun CommentBottomSheet(
                     uiState = uiState,
                     onUndo = { viewModel.onUndo(it) },
                     onDelete = { viewModel.onDelete(it) },
-                    onCommentChange = { viewModel.onCommentChange(it) },
                     onScrollTop = { viewModel.onPosition() },
-                    sendComment = { viewModel.sendComment() },
                     onFavorite = { viewModel.onFavorite(it) },
                     onReply = { viewModel.onReply(it) },
-                    onClearReply = { viewModel.onClearReply() },
                     onViewMore = { viewModel.onViewMore(it) },
                     image = image,
                     onName = onName,
@@ -109,10 +106,12 @@ fun CommentBottomSheet(
         onHidden = {
             onHidden?.invoke()
             onDismissRequest.invoke()
-            viewModel.onClear()
+            //viewModel.onClear()
+            viewModel.onHidden()
         }
     )
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
@@ -132,51 +131,64 @@ fun CommentBottomSheetBody(
     onScrollTop: () -> Unit,
     onDelete: (Long) -> Unit,
     onUndo: (Long) -> Unit,
-    sendComment: () -> Unit,
-    onCommentChange: (String) -> Unit,
     onFavorite: (Long) -> Unit,
     onReply: (Comment) -> Unit,
-    onClearReply: () -> Unit,
     onViewMore: (Long) -> Unit,
     onName: (Int) -> Unit,
     onImage: (Int) -> Unit,
     image: @Composable (Modifier, String, Dp?, Dp?, ContentScale?) -> Unit,
 ) {
-    ConstraintLayout(
-        modifier = modifier
-            .padding(bottom = if (uiState.reply != null) 100.dp else 50.dp)
-            .fillMaxSize(),
-        constraintSet = commentsBottomSheetConstraintSet()
-    ) {
-        Text(
-            modifier = Modifier.layoutId("title"),
-            text = "Comments",
-            fontWeight = FontWeight.Bold
-        )
-        //CommentHelp(Modifier.layoutId("commentHelp"))
 
-        if (uiState.list.isEmpty()) {
-            EmptyComment(Modifier.layoutId("itemCommentList"))
-        } else {
-            Comments(
-                modifier = Modifier
-                    .layoutId("itemCommentList")
-                    .heightIn(min = 350.dp)
-                    .fillMaxWidth(),
-                list = uiState.list,
-                movePosition = uiState.movePosition,
-                onPosition = onScrollTop,
-                onDelete = onDelete,
-                onUndo = onUndo,
-                onFavorite = onFavorite,
-                onReply = onReply,
-                myId = uiState.writer?.userId,
-                onViewMore = onViewMore,
-                image = image,
-                onName = onName,
-                onImage = onImage
-            )
+    when (uiState) {
+        is CommentsUiState.Success -> {
+            Log.d(TAG, "__CommentBottomSheetBody: Success")
+            ConstraintLayout(
+                modifier = modifier
+                    .padding(bottom = if (uiState.comments.reply != null) 100.dp else 50.dp)
+                    .fillMaxSize(),
+                constraintSet = commentsBottomSheetConstraintSet()
+            ) {
+                Text(
+                    modifier = Modifier.layoutId("title"),
+                    text = "Comments",
+                    fontWeight = FontWeight.Bold
+                )
+                //CommentHelp(Modifier.layoutId("commentHelp"))
+
+                if (uiState.comments.list.isEmpty()) {
+                    EmptyComment(Modifier.layoutId("itemCommentList"))
+                } else {
+                    Comments(
+                        modifier = Modifier
+                            .layoutId("itemCommentList")
+                            .heightIn(min = 350.dp)
+                            .fillMaxWidth(),
+                        list = uiState.comments.list,
+                        movePosition = uiState.comments.movePosition,
+                        onPosition = onScrollTop,
+                        onDelete = onDelete,
+                        onUndo = onUndo,
+                        onFavorite = onFavorite,
+                        onReply = onReply,
+                        myId = uiState.comments.writer?.userId,
+                        onViewMore = onViewMore,
+                        image = image,
+                        onName = onName,
+                        onImage = onImage,
+                        isLogin = uiState.comments.isLogin
+                    )
+                }
+            }
         }
+
+        CommentsUiState.Loading -> {
+            Log.d(TAG, "CommentBottomSheetBody: Loading")
+            Box(modifier = Modifier.fillMaxSize()) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+        }
+
+        CommentsUiState.Error -> {}
     }
 }
 
@@ -232,33 +244,32 @@ fun commentsBottomSheetConstraintSet(): ConstraintSet {
 fun PreviewCommentBody() {
     CommentBottomSheetBody(/*Preview*/
         onScrollTop = {},
-        onCommentChange = {},
         onDelete = {},
         onUndo = {},
-        sendComment = {},
         image = { _, _, _, _, _ -> },
-        uiState = CommentsUiState().copy(
-            list = arrayListOf(
-                testComment(0),
-                testComment(1),
-                testComment(2),
-                testSubComment(9),
-                testSubComment(10),
-                testSubComment(11),
-                testComment(3),
-                testComment(4),
-                testComment(5),
-                testComment(6),
-                testComment(7),
-                testComment(8),
-            ),
-            writer = User("", 10, ""),
-            reply = testComment()
+        uiState = CommentsUiState.Success(
+            Comments().copy(
+                list = arrayListOf(
+                    testComment(0),
+                    testComment(1),
+                    testComment(2),
+                    testSubComment(9),
+                    testSubComment(10),
+                    testSubComment(11),
+                    testComment(3),
+                    testComment(4),
+                    testComment(5),
+                    testComment(6),
+                    testComment(7),
+                    testComment(8),
+                ),
+                writer = User("", 10, ""),
+                reply = testComment()
+            )
         ),
         onReply = {},
         onFavorite = {},
         onViewMore = {},
-        onClearReply = {},
         onName = {},
         onImage = {}
 
