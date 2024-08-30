@@ -141,7 +141,6 @@ fun CommentBottomSheetBody(
 
     when (uiState) {
         is CommentsUiState.Success -> {
-            Log.d(TAG, "__CommentBottomSheetBody: Success")
             ConstraintLayout(
                 modifier = modifier
                     .padding(bottom = if (uiState.comments.reply != null) 100.dp else 50.dp)
@@ -182,7 +181,6 @@ fun CommentBottomSheetBody(
         }
 
         CommentsUiState.Loading -> {
-            Log.d(TAG, "CommentBottomSheetBody: Loading")
             Box(modifier = Modifier.fillMaxSize()) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }

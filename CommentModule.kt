@@ -1,5 +1,6 @@
 package com.sarang.torang.di.comment_di
 
+import android.util.Log
 import com.sarang.torang.BuildConfig
 import com.sarang.torang.api.ApiComment
 import com.sarang.torang.api.ApiCommentLike
@@ -64,6 +65,7 @@ class CommentModule {
     ): GetUserUseCase {
         return object : GetUserUseCase {
             override suspend fun invoke(): Flow<User?> {
+                Log.d("__providesGetUserUseCase", "invoke() called")
                 return loggedInUserDao.getLoggedInUser().map {
                     if (it != null) {
                         User(
