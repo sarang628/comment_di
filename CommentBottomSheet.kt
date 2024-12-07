@@ -43,7 +43,7 @@ import com.sarang.torang.uistate.Comments
 import com.sarang.torang.uistate.CommentsUiState
 import com.sarang.torang.uistate.isLogin
 import com.sarang.torang.viewmodels.CommentViewModel
-import com.sryang.torang.compose.bottomsheet.bottomsheetscaffold.TorangCommentBottomSheetScaffold
+import com.sarang.torang.compose.bottomsheet.bottomsheetscaffold.TorangCommentBottomSheetScaffold
 
 private val TAG = "__CommentBottomSheet"
 
