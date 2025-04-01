@@ -1,6 +1,5 @@
 package com.sarang.torang.di.comment_di
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -10,7 +9,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -31,6 +29,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.sarang.torang.compose.bottomsheet.bottomsheetscaffold.TorangCommentBottomSheetScaffold
 import com.sarang.torang.compose.comments.Comments
 import com.sarang.torang.compose.comments.EmptyComment
 import com.sarang.torang.compose.comments.InputComment
@@ -43,7 +42,6 @@ import com.sarang.torang.uistate.Comments
 import com.sarang.torang.uistate.CommentsUiState
 import com.sarang.torang.uistate.isLogin
 import com.sarang.torang.viewmodels.CommentViewModel
-import com.sarang.torang.compose.bottomsheet.bottomsheetscaffold.TorangCommentBottomSheetScaffold
 
 private val TAG = "__CommentBottomSheet"
 
@@ -69,8 +67,8 @@ fun CommentBottomSheet(
             viewModel.loadComment(reviewId)
     }
 
-    TorangCommentBottomSheetScaffold(
-        show = reviewId != null,
+    TorangCommentBottomSheetScaffold( // torang bottom sheet library components
+        show = show,
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         input = {
             if (uiState is CommentsUiState.Success)
@@ -190,7 +188,7 @@ fun CommentBottomSheetBody(
     }
 }
 
-fun commentsBottomSheetConstraintSet(): ConstraintSet {
+private fun commentsBottomSheetConstraintSet(): ConstraintSet {
     return ConstraintSet {
         val title = createRefFor("title")
         val commentHelp = createRefFor("commentHelp")
