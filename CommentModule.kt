@@ -65,7 +65,6 @@ class CommentModule {
     ): GetUserUseCase {
         return object : GetUserUseCase {
             override suspend fun invoke(): Flow<User?> {
-                Log.d("__providesGetUserUseCase", "invoke() called")
                 return loggedInUserDao.getLoggedInUser().map {
                     if (it != null) {
                         User(

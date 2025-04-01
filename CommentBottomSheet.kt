@@ -29,7 +29,6 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.sarang.torang.compose.bottomsheet.bottomsheetscaffold.TorangCommentBottomSheetScaffold
 import com.sarang.torang.compose.comments.Comments
 import com.sarang.torang.compose.comments.EmptyComment
 import com.sarang.torang.compose.comments.InputComment
@@ -42,8 +41,7 @@ import com.sarang.torang.uistate.Comments
 import com.sarang.torang.uistate.CommentsUiState
 import com.sarang.torang.uistate.isLogin
 import com.sarang.torang.viewmodels.CommentViewModel
-
-private val TAG = "__CommentBottomSheet"
+import com.sarang.torang.compose.bottomsheet.bottomsheetscaffold.TorangCommentBottomSheetScaffold
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,7 +58,7 @@ fun CommentBottomSheet(
 ) {
     val uiState = viewModel.uiState
     val replySingleEvent by viewModel.replySingleEvent.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
+    val snackBarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(key1 = reviewId) {
         if (reviewId != null)
@@ -69,11 +67,11 @@ fun CommentBottomSheet(
 
     TorangCommentBottomSheetScaffold( // torang bottom sheet library components
         show = show,
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
         input = {
             if (uiState is CommentsUiState.Success)
                 InputComment(
-                    uiState = uiState.comments,
+                    comments = uiState.comments,
                     sendComment = { viewModel.sendComment() },
                     onCommentChange = { viewModel.onCommentChange(it) },
                     onClearReply = { viewModel.onClearReply() },
@@ -116,7 +114,7 @@ fun CommentBottomSheet(
 @Composable
 fun PreviewCommentBottomSheet() {
     TorangCommentBottomSheetScaffold(input = { PreviewInputComment() }, sheetContent = {
-        PreviewCommentBody()
+        PreviewCommentBottomSheetBody()
     }, sheetPeekHeight = 400.dp, inputHiddenOffset = 150.dp) {
 
     }
@@ -237,7 +235,7 @@ private fun commentsBottomSheetConstraintSet(): ConstraintSet {
 
 @Preview
 @Composable
-fun PreviewCommentBody() {
+fun PreviewCommentBottomSheetBody() {
     CommentBottomSheetBody(/*Preview*/
         onScrollTop = {},
         onDelete = {},
