@@ -71,7 +71,7 @@ fun CommentBottomSheet(
         input = {
             if (uiState is CommentsUiState.Success)
                 InputComment(
-                    uiState = uiState.comments,
+                    comments = uiState.comments,
                     sendComment = { viewModel.sendComment() },
                     onCommentChange = { viewModel.onCommentChange(it) },
                     onClearReply = { viewModel.onClearReply() },
