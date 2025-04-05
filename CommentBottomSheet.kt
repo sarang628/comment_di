@@ -29,6 +29,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.sarang.torang.compose.bottomsheet.bottomsheetscaffold.InputInteractBottomSheetScaffold
 import com.sarang.torang.compose.comments.Comments
 import com.sarang.torang.compose.comments.EmptyComment
 import com.sarang.torang.compose.comments.InputComment
@@ -41,7 +42,6 @@ import com.sarang.torang.uistate.Comments
 import com.sarang.torang.uistate.CommentsUiState
 import com.sarang.torang.uistate.isLogin
 import com.sarang.torang.viewmodels.CommentViewModel
-import com.sarang.torang.compose.bottomsheet.bottomsheetscaffold.TorangCommentBottomSheetScaffold
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,7 +65,7 @@ fun CommentBottomSheet(
             viewModel.loadComment(reviewId)
     }
 
-    TorangCommentBottomSheetScaffold( // torang bottom sheet library components
+    InputInteractBottomSheetScaffold( // torang bottom sheet library components
         show = show,
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
         input = {
@@ -109,11 +109,10 @@ fun CommentBottomSheet(
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 fun PreviewCommentBottomSheet() {
-    TorangCommentBottomSheetScaffold(input = { PreviewInputComment() }, sheetContent = {
+    InputInteractBottomSheetScaffold(input = { PreviewInputComment() }, sheetContent = {
         PreviewCommentBottomSheetBody()
     }, sheetPeekHeight = 400.dp, inputHiddenOffset = 150.dp) {
 
