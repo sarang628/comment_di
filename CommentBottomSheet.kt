@@ -43,7 +43,6 @@ import com.sarang.torang.uistate.CommentsUiState
 import com.sarang.torang.uistate.isLogin
 import com.sarang.torang.viewmodels.CommentViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CommentBottomSheet(
     viewModel: CommentViewModel = hiltViewModel(),
