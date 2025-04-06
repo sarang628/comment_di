@@ -79,7 +79,7 @@ fun CommentBottomSheet(
                 )
         },
         sheetPeekHeight = 400.dp,
-        inputHiddenOffset = 200.dp,
+        criterionHeight = 200.dp,
         sheetContent = {
             Column {
                 CommentBottomSheetBody(
@@ -113,7 +113,7 @@ fun CommentBottomSheet(
 fun PreviewCommentBottomSheet() {
     InputInteractBottomSheetScaffold(input = { PreviewInputComment() }, sheetContent = {
         PreviewCommentBottomSheetBody()
-    }, sheetPeekHeight = 400.dp, inputHiddenOffset = 150.dp) {
+    }, sheetPeekHeight = 400.dp, criterionHeight = 150.dp) {
 
     }
 }
