@@ -7,8 +7,8 @@ import com.sarang.torang.api.ApiCommentLike
 import com.sarang.torang.compose.comments.IsLoginFlowForCommentUseCase
 import com.sarang.torang.data.comments.Comment
 import com.sarang.torang.data.comments.User
-import com.sarang.torang.data.dao.LoggedInUserDao
-import com.sarang.torang.data.entity.CommentEntity
+import com.sarang.torang.core.database.dao.LoggedInUserDao
+import com.sarang.torang.core.database.model.comment.CommentEntity
 import com.sarang.torang.data.remote.response.RemoteComment
 import com.sarang.torang.repository.LoginRepository
 import com.sarang.torang.repository.comment.CommentRepository
