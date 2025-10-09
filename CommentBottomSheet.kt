@@ -15,7 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.sarang.torang.compose.bottomsheet.bottomsheetscaffold.InputInteractBottomSheetScaffold
+import com.sarang.torang.compose.bottomsheet.bottomsheetscaffold.FixedInputBottomSheetScaffold
 import com.sarang.torang.compose.comments.InputComment
 import com.sarang.torang.compose.comments.PreviewInputComment
 import com.sarang.torang.uistate.CommentsUiState
@@ -42,7 +42,7 @@ fun CommentBottomSheet(
             viewModel.loadComment(reviewId)
     }
 
-    InputInteractBottomSheetScaffold( // torang bottom sheet library components
+    FixedInputBottomSheetScaffold( // torang bottom sheet library components
         show = show,
         snackbarHost = { SnackbarHost(hostState = snackBarHostState) },
         input = {
@@ -57,7 +57,7 @@ fun CommentBottomSheet(
                 )
         },
         sheetPeekHeightPercent = 55,
-        criterionHeight = 50.dp,
+        inputHeight = 50.dp,
         sheetContent = {
             Column {
                 CommentBottomSheetBody(
@@ -88,9 +88,9 @@ fun CommentBottomSheet(
 @Preview
 @Composable
 fun PreviewCommentBottomSheet() {
-    InputInteractBottomSheetScaffold(input = { PreviewInputComment() }, sheetContent = {
+    FixedInputBottomSheetScaffold(input = { PreviewInputComment() }, sheetContent = {
         PreviewCommentBottomSheetBody()
-    }, sheetPeekHeightPercent = 65, criterionHeight = 150.dp) {
+    }, sheetPeekHeightPercent = 65, inputHeight = 150.dp) {
 
     }
 }
