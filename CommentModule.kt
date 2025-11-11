@@ -65,7 +65,7 @@ class CommentModule {
     ): GetUserUseCase {
         return object : GetUserUseCase {
             override suspend fun invoke(): Flow<User?> {
-                return loggedInUserDao.getLoggedInUser().map {
+                return loggedInUserDao.getLoggedInUserFlow().map {
                     if (it != null) {
                         User(
                             BuildConfig.PROFILE_IMAGE_SERVER_URL + it.profilePicUrl,
