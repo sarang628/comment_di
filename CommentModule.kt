@@ -1,15 +1,14 @@
 package com.sarang.torang.di.comment_di
 
-import android.util.Log
 import com.sarang.torang.BuildConfig
 import com.sarang.torang.api.ApiComment
 import com.sarang.torang.api.ApiCommentLike
 import com.sarang.torang.compose.comments.IsLoginFlowForCommentUseCase
+import com.sarang.torang.core.database.dao.LoggedInUserDao
 import com.sarang.torang.data.comments.Comment
 import com.sarang.torang.data.comments.User
-import com.sarang.torang.core.database.dao.LoggedInUserDao
-import com.sarang.torang.core.database.model.comment.CommentEntity
 import com.sarang.torang.data.remote.response.RemoteComment
+import com.sarang.torang.di.repository.from
 import com.sarang.torang.repository.LoginRepository
 import com.sarang.torang.repository.comment.CommentRepository
 import com.sarang.torang.session.SessionClientService
@@ -41,7 +40,15 @@ class CommentModule {
         return object : GetCommentsUseCase {
             override suspend fun invoke(reviewId: Int): Flow<List<Comment>> {
                 return commentRepository.getCommentsFlow(reviewId).map {
-                    it.toComments()
+                    it.map { com.sarang.torang.data.comments.Comment(
+                        commentsId = it.commentId.toLong(),
+                        userId = it.userId,
+                        profileImageUrl = it.profilePicUrl,
+                        date = it.createDate,
+                        comment = it.comment,
+                        name = it.userName,
+                        commentLikeCount = it.commentLikeCount
+                    ) }
                 }
             }
         }
@@ -183,14 +190,14 @@ class CommentModule {
         )
     }
 
-    private fun CommentEntity.toComment(): Comment {
+    private fun Comment.toComment(): Comment {
         return Comment(
-            name = userName,
+            name = this.name,
             comment = comment,
-            date = DateConverter.formattedDate(createDate),
-            profileImageUrl = BuildConfig.PROFILE_IMAGE_SERVER_URL + profilePicUrl,
+            date = DateConverter.formattedDate(this.date),
+            profileImageUrl = BuildConfig.PROFILE_IMAGE_SERVER_URL + this.profileImageUrl,
             userId = userId,
-            commentsId = commentId.toLong(),
+            commentsId = this.commentsId,
             commentLikeCount = commentLikeCount,
             commentLikeId = commentLikeId,
             /*tagUser = if (it.tagUser != null) TagUser(
@@ -203,7 +210,7 @@ class CommentModule {
         )
     }
 
-    fun List<CommentEntity>.toComments(): List<Comment> {
+    fun List<Comment>.toComments(): List<Comment> {
         return this.map {
             it.toComment()
         }
