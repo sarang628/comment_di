@@ -7,7 +7,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.dp
 import com.sarang.torang.RootNavController
+import com.sarang.torang.compose.iconSize
+import com.sarang.torang.di.image.TorangAsyncImageData
 import com.sarang.torang.di.image.provideTorangAsyncImage
 
 private val tag : String = "__CommentBottomDialogSheetData"
@@ -35,7 +39,16 @@ fun provideCommentBottomDialogSheet(
             onHidden            = { it.onHidden.invoke(); show = false },
             show                = show,
             content             = it.content,
-            image               = provideTorangAsyncImage(),
+            image               = {modifier, string, dp, dp1, scale ->  provideTorangAsyncImage().invoke(
+                TorangAsyncImageData(modifier = modifier,
+                    model = string,
+                    progressSize = dp ?: 30.dp,
+                    errorIconSize = dp1?: 30.dp,
+                    contentScale = scale ?: ContentScale.None
+
+
+                )
+            ) },
             onImage             = { rootNavController.profile(it) },
             onName              = { rootNavController.profile(it) }
         )
