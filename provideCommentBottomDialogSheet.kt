@@ -10,7 +10,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.sarang.torang.RootNavController
-import com.sarang.torang.compose.iconSize
 import com.sarang.torang.di.image.TorangAsyncImageData
 import com.sarang.torang.di.image.provideTorangAsyncImage
 
